@@ -1,5 +1,5 @@
 // svlikespro-bot.js
-// Custom Telegram bot for SMM panel using Node.js and Render
+// Custom Telegram bot for SMM panel using Node.js and Render (Orders only)
 
 const express = require('express');
 const axios = require('axios');
@@ -32,20 +32,7 @@ app.post(`/webhook`, async (req, res) => {
   const text = message.text.trim();
 
   if (text === '/start') {
-    await sendMessage(chatId, `👋 Welcome to SVLikes Pro Bot\nYou can use:\n/orders - check latest orders\n/balance - check your balance`);
-  }
-
-  else if (text === '/balance') {
-    try {
-      const response = await axios.post(`${PANEL_API_URL}/getUser`, {
-        token: PANEL_TOKEN
-      });
-      const balance = response.data.balance;
-      await sendMessage(chatId, `💰 Your current balance is: $${balance}`);
-    } catch (e) {
-      const errMsg = e.response?.data?.error || e.message || 'Unknown error';
-      await sendMessage(chatId, `❌ Error getting balance:\n${errMsg}`);
-    }
+    await sendMessage(chatId, `👋 Welcome to SVLikes Pro Bot\nYou can use:\n/orders - check latest orders`);
   }
 
   else if (text === '/orders') {
@@ -54,9 +41,13 @@ app.post(`/webhook`, async (req, res) => {
         token: PANEL_TOKEN,
         limit: 5
       });
-      const orders = response.data.orders || [];
+      const orders = response.data.items || [];
       if (orders.length === 0) return sendMessage(chatId, '📭 No recent orders.');
-      const formatted = orders.map(o => `#${o.order} • ${o.status} • $${o.price}`).join('\n');
+
+      const formatted = orders.map(o => (
+        `#${o.id} • ${o.status}\n💵 $${o.charge} • Service: ${o.service_id}\n👤 ${o.user?.login || 'N/A'}`
+      )).join('\n\n');
+
       await sendMessage(chatId, `📦 Latest Orders:\n${formatted}`);
     } catch (e) {
       const errMsg = e.response?.data?.error || e.message || 'Unknown error';
