@@ -43,7 +43,8 @@ app.post(`/webhook`, async (req, res) => {
       const balance = response.data.balance;
       await sendMessage(chatId, `💰 Your current balance is: $${balance}`);
     } catch (e) {
-      await sendMessage(chatId, `❌ Error getting balance.`);
+      const errMsg = e.response?.data?.error || e.message || 'Unknown error';
+      await sendMessage(chatId, `❌ Error getting balance:\n${errMsg}`);
     }
   }
 
@@ -58,7 +59,8 @@ app.post(`/webhook`, async (req, res) => {
       const formatted = orders.map(o => `#${o.order} • ${o.status} • $${o.price}`).join('\n');
       await sendMessage(chatId, `📦 Latest Orders:\n${formatted}`);
     } catch (e) {
-      await sendMessage(chatId, `❌ Error fetching orders.`);
+      const errMsg = e.response?.data?.error || e.message || 'Unknown error';
+      await sendMessage(chatId, `❌ Error fetching orders:\n${errMsg}`);
     }
   }
 
