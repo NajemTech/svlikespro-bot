@@ -1,5 +1,5 @@
 // svlikespro-bot.js
-// Telegram bot for SVLikes Pro panel (Orders only - fixed with GET)
+// Telegram bot for SVLikes Pro panel with WebView button
 
 const express = require('express');
 const axios = require('axios');
@@ -12,14 +12,16 @@ app.use(bodyParser.json());
 const BOT_TOKEN = process.env.BOT_TOKEN || '8015998674:AAHZtvzrwZc7KwmvvchHu7lUwURMH0kznwM';
 const PANEL_API_URL = process.env.PANEL_API_URL || 'https://svlikespro.com/privateApi';
 const PANEL_TOKEN = process.env.PANEL_TOKEN || 'HSQ0BDrD3Ksh5FzT3guJbUYmKhNDu3sXQytXmlvGfx1e9OX4KFnWA3OAwcqT';
+const PANEL_URL = 'https://svlikespro.com';
 
 const TELEGRAM_API = `https://api.telegram.org/bot${BOT_TOKEN}`;
 
 // === SEND MESSAGE ===
-async function sendMessage(chatId, text) {
+async function sendMessage(chatId, text, replyMarkup = null) {
   await axios.post(`${TELEGRAM_API}/sendMessage`, {
     chat_id: chatId,
     text: text,
+    reply_markup: replyMarkup
   });
 }
 
@@ -32,7 +34,15 @@ app.post('/webhook', async (req, res) => {
   const text = message.text.trim();
 
   if (text === '/start') {
-    await sendMessage(chatId, `👋 Welcome to SVLikes Pro Bot\nYou can use:\n/orders - check your 5 latest orders`);
+    const button = {
+      inline_keyboard: [[
+        {
+          text: '🧾 Open My Dashboard',
+          url: PANEL_URL
+        }
+      ]]
+    };
+    await sendMessage(chatId, `👋 Welcome to SVLikes Pro Bot\nUse the button below to access your dashboard.`, button);
   }
 
   else if (text === '/orders') {
