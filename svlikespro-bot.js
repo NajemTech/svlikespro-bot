@@ -37,7 +37,9 @@ app.post(`/webhook`, async (req, res) => {
 
   else if (text === '/balance') {
     try {
-      const response = await axios.get(`${PANEL_API_URL}/getUser?token=${PANEL_TOKEN}`);
+      const response = await axios.post(`${PANEL_API_URL}/getUser`, {
+        token: PANEL_TOKEN
+      });
       const balance = response.data.balance;
       await sendMessage(chatId, `💰 Your current balance is: $${balance}`);
     } catch (e) {
@@ -47,7 +49,10 @@ app.post(`/webhook`, async (req, res) => {
 
   else if (text === '/orders') {
     try {
-      const response = await axios.get(`${PANEL_API_URL}/getOrders?limit=5&token=${PANEL_TOKEN}`);
+      const response = await axios.post(`${PANEL_API_URL}/getOrders`, {
+        token: PANEL_TOKEN,
+        limit: 5
+      });
       const orders = response.data.orders || [];
       if (orders.length === 0) return sendMessage(chatId, '📭 No recent orders.');
       const formatted = orders.map(o => `#${o.order} • ${o.status} • $${o.price}`).join('\n');
