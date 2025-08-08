@@ -1,5 +1,5 @@
 // svlikespro-bot.js
-// Telegram bot for SVLikes Pro panel with WebView button
+// Telegram bot for SVLikes Pro panel with WebView button and fixed reply_markup
 
 const express = require('express');
 const axios = require('axios');
@@ -18,11 +18,16 @@ const TELEGRAM_API = `https://api.telegram.org/bot${BOT_TOKEN}`;
 
 // === SEND MESSAGE ===
 async function sendMessage(chatId, text, replyMarkup = null) {
-  await axios.post(`${TELEGRAM_API}/sendMessage`, {
+  const payload = {
     chat_id: chatId,
-    text: text,
-    reply_markup: replyMarkup
-  });
+    text: text
+  };
+  if (replyMarkup) {
+    payload.reply_markup = {
+      inline_keyboard: replyMarkup.inline_keyboard
+    };
+  }
+  await axios.post(`${TELEGRAM_API}/sendMessage`, payload);
 }
 
 // === HANDLE COMMANDS ===
